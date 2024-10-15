@@ -2,23 +2,25 @@
 #include <iostream>
 #include <thread>
 
+#include <wrl\implements.h>
+
 #include <LoopbackCapture.h>
 
 extern "C" void* loopback_capture_new()
 {
-    CLoopbackCapture pLoopbackCapture;
-    return &pLoopbackCapture;
+    ComPtr<CLoopbackCapture> pLoopbackCapture = Make<CLoopbackCapture>();
+    return pLoopbackCapture.Get();
 }
 
 extern "C" void loopback_capture_set_callback(void* loopback_capture_ptr, void* callback)
 {
-    CLoopbackCapture* pLoopbackCapture = reinterpret_cast<CLoopbackCapture*>(loopback_capture_ptr);
+    ComPtr<CLoopbackCapture> pLoopbackCapture = Make<CLoopbackCapture>(loopback_capture_ptr);
     pLoopbackCapture->SetPacketCallback(callback);
 }
 
 extern "C" void loopback_capture_set_callback_user_data(void* loopback_capture_ptr, void* user_data)
 {
-    CLoopbackCapture* pLoopbackCapture = reinterpret_cast<CLoopbackCapture*>(loopback_capture_ptr);
+    ComPtr<CLoopbackCapture> pLoopbackCapture = Make<CLoopbackCapture>(loopback_capture_ptr);
     pLoopbackCapture->SetPacketCallbackUserData(user_data);
 }
 
@@ -28,7 +30,7 @@ extern "C" void loopback_capture_start(void* loopback_capture_ptr, const char* o
     wchar_t* wc = new wchar_t[o_file_len];
     mbstowcs (wc, output_file_name, o_file_len);
 
-    CLoopbackCapture* pLoopbackCapture = reinterpret_cast<CLoopbackCapture*>(loopback_capture_ptr);
+    ComPtr<CLoopbackCapture> pLoopbackCapture = Make<CLoopbackCapture>(loopback_capture_ptr);
     HRESULT hr = pLoopbackCapture->StartCaptureAsync(process_id, include_process_tree, wc);
     if (FAILED(hr))
     {
@@ -46,6 +48,6 @@ extern "C" void loopback_capture_start(void* loopback_capture_ptr, const char* o
 
 extern "C" void loopback_capture_stop(void* loopback_capture_ptr)
 {
-    CLoopbackCapture* pLoopbackCapture = reinterpret_cast<CLoopbackCapture*>(loopback_capture_ptr);
+    ComPtr<CLoopbackCapture> pLoopbackCapture = Make<CLoopbackCapture>(loopback_capture_ptr);
     pLoopbackCapture->StopCaptureAsync();
 }

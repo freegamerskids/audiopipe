@@ -32,22 +32,18 @@ class CLoopbackCapture :
 {
 public:
     CLoopbackCapture() = default;
+    CLoopbackCapture(void*){};
     ~CLoopbackCapture();
 
     HRESULT StartCaptureAsync(DWORD processId, bool includeProcessTree, PCWSTR outputFileName);
     HRESULT StopCaptureAsync();
 
+    void SetPacketCallback(void* callback);
+    void SetPacketCallbackUserData(void* user_data);
+
     DeviceState GetDeviceState() const {
         return m_DeviceState;
     };
-
-    void SetPacketCallback(void* callback) {
-        packetCallback = callback;
-    }
-
-    void SetPacketCallbackUserData(void* user_data) {
-        packetCallbackUserData = user_data;
-    }
 
     METHODASYNCCALLBACK(CLoopbackCapture, StartCapture, OnStartCapture);
     METHODASYNCCALLBACK(CLoopbackCapture, StopCapture, OnStopCapture);
@@ -96,6 +92,6 @@ private:
     wil::unique_event_nothrow m_hActivateCompleted;
     wil::unique_event_nothrow m_hCaptureStopped;
 
-    void* packetCallback = nullptr;
-    void* packetCallbackUserData = nullptr;
+    UINT64 m_packetCallback;
+    UINT64 m_packetCallbackUserData;
 };

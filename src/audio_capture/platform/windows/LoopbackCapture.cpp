@@ -96,7 +96,7 @@ HRESULT CLoopbackCapture::ActivateCompleted(IActivateAudioInterfaceAsyncOperatio
             // 16 - bit PCM format.
             m_CaptureFormat.wFormatTag = WAVE_FORMAT_PCM;
             m_CaptureFormat.nChannels = 2;
-            m_CaptureFormat.nSamplesPerSec = 44100;
+            m_CaptureFormat.nSamplesPerSec = 48000;
             m_CaptureFormat.wBitsPerSample = 16;
             m_CaptureFormat.nBlockAlign = m_CaptureFormat.nChannels * m_CaptureFormat.wBitsPerSample / BITS_PER_BYTE;
             m_CaptureFormat.nAvgBytesPerSec = m_CaptureFormat.nSamplesPerSec * m_CaptureFormat.nBlockAlign;
@@ -335,7 +335,15 @@ HRESULT CLoopbackCapture::OnSampleReady(IMFAsyncResult* pResult)
     return S_OK;
 }
 
-typedef void (*loopback_callback)(BYTE** data, UINT32* num_frames, DWORD* flags, UINT64* device_position, void* user_data);
+void CLoopbackCapture::SetPacketCallback(void* callback) {
+    m_packetCallback = (UINT64)callback;
+}
+
+void CLoopbackCapture::SetPacketCallbackUserData(void* user_data) {
+    m_packetCallbackUserData = (UINT64)user_data;
+}
+
+typedef void (*loopback_callback)(BYTE* data, UINT32* num_frames, DWORD* flags, UINT64* device_position, void* user_data);
 
 //
 //  OnAudioSampleRequested()
@@ -360,7 +368,7 @@ HRESULT CLoopbackCapture::OnAudioSampleRequested()
         return S_OK;
     }
 
-    loopback_callback callback = (loopback_callback)packetCallback;
+    loopback_callback callback = (loopback_callback)((void*)m_packetCallback);
 
     // A word on why we have a loop here;
     // Suppose it has been 10 milliseconds or so since the last time
@@ -400,7 +408,9 @@ HRESULT CLoopbackCapture::OnAudioSampleRequested()
         // Write File
         if (m_DeviceState != DeviceState::Stopping)
         {
-            callback(&Data, &FramesAvailable, &dwCaptureFlags, &u64DevicePosition, packetCallbackUserData);
+            callback(Data, &FramesAvailable, &dwCaptureFlags, &u64DevicePosition, (void*)m_packetCallbackUserData);
+
+            //printf("%u\n", Data[0]);
 
             DWORD dwBytesWritten = 0;
             RETURN_IF_WIN32_BOOL_FALSE(WriteFile(

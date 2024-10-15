@@ -13,6 +13,6 @@ cargo run --release
 
 ## todo
 - [x] node graph editor
-- [ ] audio capture
+- [x] audio capture (for windows only for now)
 - [ ] audio processing
 - [ ] virtual audio cable(s) (would need to make a driver for this...)
