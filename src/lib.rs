@@ -25,7 +25,6 @@ pub struct NodeState {
     node_name: String,
     node_type: NodeType,
     attributes: (Vec<NodeAttribute>, Vec<NodeAttribute>),
-    next_function: Option<Box<dyn FnMut(Vec<i16>)>>,
 }
 
 // Define some types that sockets may have.

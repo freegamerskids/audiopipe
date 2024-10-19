@@ -22,7 +22,6 @@ impl Application {
                     node_name: String::from("Iced"),
                     node_type: NodeType::Microphone,
                     attributes: (vec![], vec![NodeAttribute::BlueSquare(None), NodeAttribute::RedCircle(None)]),
-                    next_function: None
                 },
                 // Node #1
                 NodeState {
@@ -37,7 +36,6 @@ impl Application {
                             NodeAttribute::Button(Some("I am a button")),
                         ],
                     ),
-                    next_function: None
                 },
                 // Node #2
                 NodeState {
@@ -45,7 +43,6 @@ impl Application {
                     node_name: String::from("Editor"),
                     node_type: NodeType::PlaybackDevice,
                     attributes: (vec![NodeAttribute::BlueSquare(None), NodeAttribute::RedCircle(None)], vec![]),
-                    next_function: None
                 },
             ],
             connections,
