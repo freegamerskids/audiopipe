@@ -28,14 +28,11 @@ jobs:
         run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
-      - name: Archive Build 
-        run: Compress-Archive -Path target/release/audiopipe.exe -DestinationPath audiopipe.zip
-        shell: pwsh
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Binary
-          path: audiopipe.zip
+          name: audiopipe_win
+          path: target/release/audiopipe.exe
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
@@ -54,19 +51,18 @@ jobs:
           target: x86_64-unknown-linux-gnu
           toolchain: stable
           rustflags: "" # i dont want warnings to be errors
+      - name: Install Dependencies
+        run: sudo apt-get install -y alsa
       - name: Compile
         id: compile
         run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
-      - name: Archive Build 
-        run: tar -czvf audiopipe.tar.gz -C target/release audiopipe
-        shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Binary
-          path: audiopipe.tar.gz
+          name: audiopipe_linux
+          path: target/release/audiopipe
   build-mac:
     name: Build MacOS
     runs-on: macos-latest
@@ -90,11 +86,8 @@ jobs:
         run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
-      - name: Archive Build 
-        run: zip -9r audiopipe.zip target/release/audiopipe
-        shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: Binary
-          path: audiopipe.zip
+          name: audiopipe_mac
+          path: target/release/audiopipe
