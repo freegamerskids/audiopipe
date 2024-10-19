@@ -20,6 +20,10 @@ jobs:
             archive: zip
     steps:
       - uses: actions/checkout@master
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+            version: "18.0"
       - name: Compile
         id: compile
         uses: rust-build/rust-build.action@v1.4.5
@@ -28,6 +32,8 @@ jobs:
           ARCHIVE_TYPES: ${{ matrix.archive }}
           UPLOAD_MODE: none
           TOOLCHAIN_VERSION: stable
+        env:
+          LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
