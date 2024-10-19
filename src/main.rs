@@ -13,7 +13,7 @@ pub fn main() -> iced::Result {
         .window_size(iced::Size { width: 800.0, height: 600.0 })
         .run()?;
 
-    let pid = 4652;
+    /*let pid = 4652;
     println!("capturing audio for process with pid: {}", pid);
 
     write("test_rust.wav", &[0i16], 48000, 2).unwrap();
@@ -30,7 +30,7 @@ pub fn main() -> iced::Result {
     std::thread::sleep(Duration::from_millis(2000));
     stream.stop();
 
-    println!("capture stopped");
+    println!("capture stopped");*/
 
     Ok(())
 }
