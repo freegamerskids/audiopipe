@@ -16,23 +16,25 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2
         with:
             version: "18.1.8"
+      - name: Download Toolchain
+        id: toolchain-download
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-pc-windows-gnu
+          toolchain: stable
       - name: Compile
         id: compile
-        uses: rust-build/rust-build.action@v1.4.5
-        with:
-          RUSTTARGET: x86_64-pc-windows-gnu
-          ARCHIVE_TYPES: zip
-          UPLOAD_MODE: none
-          TOOLCHAIN_VERSION: stable
+        run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+      - name: Archive Build 
+        run: Compress-Archive -Path target/release/audiopipe.exe -DestinationPath audiopipe.zip
+        shell: pwsh
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Binary
-          path: |
-            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+          path: audiopipe.zip
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
@@ -44,23 +46,25 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2
         with:
             version: "18.1.8"
+      - name: Download Toolchain
+        id: toolchain-download
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-unknown-linux-gnu
+          toolchain: stable
       - name: Compile
         id: compile
-        uses: rust-build/rust-build.action@v1.4.5
-        with:
-          RUSTTARGET: x86_64-unknown-linux-musl
-          ARCHIVE_TYPES: tar.gz tar.xz tar.zst
-          UPLOAD_MODE: none
-          TOOLCHAIN_VERSION: stable
+        run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+      - name: Archive Build 
+        run: tar -czvf audiopipe.tar.gz -C target/release audiopipe
+        shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Binary
-          path: |
-            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+          path: audiopipe.tar.gz
   build-mac:
     name: Build MacOS
     runs-on: macos-latest
@@ -72,20 +76,22 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2
         with:
             version: "18.1.8"
+      - name: Download Toolchain
+        id: toolchain-download
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-unknown-linux-gnu
+          toolchain: stable
       - name: Compile
         id: compile
-        uses: rust-build/rust-build.action@v1.4.5
-        with:
-          RUSTTARGET: x86_64-apple-darwin
-          ARCHIVE_TYPES: zip
-          UPLOAD_MODE: none
-          TOOLCHAIN_VERSION: stable
+        run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+      - name: Archive Build 
+        run: zip -9r audiopipe.zip target/release/audiopipe
+        shell: bash
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Binary
-          path: |
-            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+          path: audiopipe.zip
