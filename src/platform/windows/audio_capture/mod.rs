@@ -8,24 +8,23 @@ extern "C" {
     fn loopback_capture_stop(loopback_capture_ptr: *mut c_void);
 }
 
+struct LoopbackCapture(*mut c_void);
+
+unsafe impl std::marker::Send for LoopbackCapture {}
+unsafe impl std::marker::Sync for LoopbackCapture {}
+
+impl LoopbackCapture {
+    fn from_loopback_capture_ptr(loopback_capture_ptr: *mut c_void) -> Self {
+        LoopbackCapture(loopback_capture_ptr)
+    }
+
+    fn to_ptr(&self) -> *mut c_void {
+        self.0
+    }
+}
+
 pub struct WindowsAudioCaptureStream {
-    loopback_capture_ptr: *mut c_void
-}
-
-#[derive(Debug)]
-pub enum WindowsAudioCaptureStreamCreateError {
-    Other(String),
-    EndpointEnumerationFailed,
-    AudioClientActivationFailed,
-    AudioClientInitializeFailed,
-    AudioCaptureCreationFailed,
-    StreamStartFailed,
-}
-
-#[derive(Debug)]
-pub enum WindowsAudioCaptureStreamError {
-    Other(String),
-    GetBufferFailed,
+    loopback_capture_ptr: LoopbackCapture
 }
 
 #[allow(unused)]
@@ -43,30 +42,15 @@ impl WindowsAudioCaptureStreamPacket<'_> {
     }
 }
 
-struct LoopbackCapture(*mut c_void);
-
-unsafe impl std::marker::Send for LoopbackCapture {}
-unsafe impl std::marker::Sync for LoopbackCapture {}
-
-impl LoopbackCapture {
-    fn from_loopback_capture_ptr(loopback_capture_ptr: *mut c_void) -> Self {
-        LoopbackCapture(loopback_capture_ptr)
-    }
-
-    fn to_ptr(&self) -> *mut c_void {
-        self.0
-    }
-}
-
 struct CCallbackUserData {
     loopback_capture_ptr: *mut c_void,
-    callback: Box<dyn for <'a> FnMut(Result<WindowsAudioCaptureStreamPacket<'a>, WindowsAudioCaptureStreamError>) + Send + 'static>,
+    callback: Box<dyn for <'a> FnMut(Result<WindowsAudioCaptureStreamPacket<'a>, bool>)>,
     last_device_position: u64,
     sample_count: u64,
 }
 
 impl WindowsAudioCaptureStream {
-    pub fn new(process_id:i32, callback: Box<dyn for <'a> FnMut(Result<WindowsAudioCaptureStreamPacket<'a>, WindowsAudioCaptureStreamError>) + Send + 'static>) -> Result<Self, WindowsAudioCaptureStreamCreateError> {
+    pub fn new(process_id:i32, callback: Box<dyn for <'a> FnMut(Result<WindowsAudioCaptureStreamPacket<'a>, bool>)>) -> Result<Self, bool> {
         unsafe {
             let loopback_capture_ptr = loopback_capture_new();
 
@@ -108,14 +92,14 @@ impl WindowsAudioCaptureStream {
             });
 
             Ok(WindowsAudioCaptureStream {
-                loopback_capture_ptr
+                loopback_capture_ptr: LoopbackCapture::from_loopback_capture_ptr(loopback_capture_ptr)
             })
         }
     }
 
     pub fn stop(&mut self) {
         unsafe {
-            loopback_capture_stop(self.loopback_capture_ptr);
+            loopback_capture_stop(self.loopback_capture_ptr.to_ptr());
         }
     }
 }
@@ -123,7 +107,10 @@ impl WindowsAudioCaptureStream {
 impl Drop for WindowsAudioCaptureStream {
     fn drop(&mut self) {
         unsafe {
-            loopback_capture_stop(self.loopback_capture_ptr);
+            loopback_capture_stop(self.loopback_capture_ptr.to_ptr());
         }
     }
 }
+
+pub use WindowsAudioCaptureStream as ImplAudioCaptureStream;
+pub use WindowsAudioCaptureStreamPacket as ImplAudioCaptureStreamPacket;

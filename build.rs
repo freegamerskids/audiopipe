@@ -7,12 +7,12 @@ fn main() {
 
     #[cfg(target_os = "windows")]
     {
-        println!("cargo::rerun-if-changed=src/audio_capture/platform/windows/LoopbackCapture.cpp");
-        println!("cargo::rerun-if-changed=src/audio_capture/platform/windows/api.cpp");
+        println!("cargo::rerun-if-changed=src/platform/windows/audio_capture/LoopbackCapture.cpp");
+        println!("cargo::rerun-if-changed=src/platform/windows/audio_capture/api.cpp");
 
-        let capture_file = PathBuf::from(&base_dir).join("src/audio_capture/platform/windows/LoopbackCapture.cpp");
-        let api_file = PathBuf::from(&base_dir).join("src/audio_capture/platform/windows/api.cpp");
-        let wil = PathBuf::from(&base_dir).join("src/audio_capture/platform/windows/include");
+        let capture_file = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/LoopbackCapture.cpp");
+        let api_file = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/api.cpp");
+        let wil = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/include");
 
         cc::Build::new()
             .cpp(true)

@@ -5,7 +5,7 @@ use iced_node_editor::{
     Socket, SocketRole, SocketSide,
 };
 
-use crate::{Application, SocketType};
+use crate::{Application, NodeAttribute};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -99,8 +99,8 @@ impl Application {
 
         // Convert our own node representations into widgets
         for (i, n) in self.nodes.iter().enumerate() {
-            // Create sockets from our lists of `SocketType`s
-            let (in_sockets, out_sockets) = &n.sockets;
+            // Create sockets from our lists of `NodeAttribute`s
+            let (in_sockets, out_sockets) = &n.attributes;
             let mut node_sockets = vec![];
             for (role, sockets) in [(SocketRole::In, in_sockets), (SocketRole::Out, out_sockets)] {
                 for socket_type in sockets {
@@ -110,14 +110,7 @@ impl Application {
                 }
             }
 
-            let node = if n.button {
-                node(iced::widget::column![
-                    text(&n.text),
-                    button("Button").on_press(Message::ButtonPressed)
-                ])
-            } else {
-                node(text(&n.text))
-            };
+            let node = node(text(&n.node_name));
 
             graph_content.push(
                 node.padding(Padding::from(10.0))
@@ -187,7 +180,7 @@ impl Default for Application {
 
 fn make_socket<'a>(
     role: SocketRole,
-    socket_type: &SocketType,
+    socket_type: &NodeAttribute,
 ) -> Socket<'a, Message, iced::Theme, iced::Renderer> {
     // With this, we determine that the input sockets should be on the left side of a node
     // and the output sockets on the right side. The opposite would be possible as well,
@@ -212,20 +205,20 @@ fn make_socket<'a>(
     // The style of the blob is not determined by a style sheet, but by properties of the `Socket`
     // itself.
     let (blob_border_radius, blob_color, content) = match socket_type {
-        SocketType::BlueSquare => (
+        NodeAttribute::BlueSquare(name) => (
             0.0,
             Color::from_rgb(0.0, 0.1, 0.8),
-            text("Blue square").into(),
+            text(name.clone().unwrap_or("Blue square".to_string())).into(),
         ),
-        SocketType::RedCircle => (
+        NodeAttribute::RedCircle(name) => (
             BLOB_RADIUS,
             Color::from_rgb(0.8, 0.1, 0.0),
-            text("Red circle").into(),
+            text(name.clone().unwrap_or("Red circle".to_string())).into(),
         ),
-        SocketType::Button => (
+        NodeAttribute::Button(name) => (
             BLOB_RADIUS,
             Color::from_rgb(0.3, 0.3, 0.3),
-            button("Button").on_press(Message::ButtonPressed).into(),
+            button(name.clone().unwrap_or("Button")).on_press(Message::ButtonPressed).into(),
         ),
     };
 
