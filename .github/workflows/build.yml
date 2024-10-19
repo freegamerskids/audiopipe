@@ -27,6 +27,7 @@ jobs:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
           UPLOAD_MODE: none
+          TOOLCHAIN_VERSION: stable
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
