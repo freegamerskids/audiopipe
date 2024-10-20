@@ -79,16 +79,24 @@ jobs:
         id: toolchain-download
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          target: x86_64-unknown-linux-gnu
+          target: x86_64-apple-darwin,aarch64-apple-darwin
           toolchain: stable
           rustflags: "" # i dont want warnings to be errors
-      - name: Compile
-        id: compile
-        run: cargo build --release
+      - name: Compile (x86_64)
+        id: compile_x86_64
+        run: cargo build --release --target x86_64-apple-darwin
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+      - name: Compile (arm64)
+        id: compile_arm64
+        run: cargo build --release --target aarch64-apple-darwin
+        env:
+          LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+      - name: Make universal binary
+        id: make_universal
+        run: lipo -create -output audiopipe target/x86_64-apple-darwin/release/audiopipe target/aarch64-apple-darwin/release/audiopipe
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: audiopipe_mac
-          path: target/release/audiopipe
+          path: audiopipe
