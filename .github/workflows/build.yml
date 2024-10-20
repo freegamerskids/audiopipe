@@ -52,12 +52,13 @@ jobs:
           toolchain: stable
           rustflags: "" # i dont want warnings to be errors
       - name: Install Dependencies
-        run: sudo apt-get install -y alsa
+        run: sudo apt-get install -y alsa libasound2-dev libudev-dev
       - name: Compile
         id: compile
         run: cargo build --release
         env:
           LIBCLANG_PATH: ${{ env.LLVM_PATH }}/lib
+          PKG_CONFIG_PATH: /usr/lib/pkgconfig
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
