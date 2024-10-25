@@ -36,8 +36,11 @@ impl NodeEvents for WindowCapture {
         }
     }
 
-    fn on_disconnect(&mut self, _start:&LogicalEndpoint, _end: &LogicalEndpoint) {
-        println!("on_disconnect");
+    fn on_disconnect(&mut self, last_connection:bool, _start:&LogicalEndpoint, _end: &LogicalEndpoint) {
+        if last_connection {
+            self.capture_stream.as_mut().unwrap().stop();
+            self.capture_stream = None;
+        }
     }
 
     fn on_data(&mut self, _data: &[i16]) {}

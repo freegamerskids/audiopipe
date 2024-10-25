@@ -1,11 +1,58 @@
 pub mod window;
+pub mod playback_device;
+pub mod input_device;
 
 use std::collections::HashMap;
 
 use iced::Point;
-use iced_node_editor::Matrix;
+use iced_node_editor::{LogicalEndpoint, Matrix};
+use input_device::InputDevice;
 
-use crate::{Application, NodeState, NodeAttribute, NodeType};
+use crate::{Application, NodeAttribute, NodeEvents, NodeState, NodeType};
+
+impl NodeEvents for NodeType {
+    fn on_connect(&mut self, start:&LogicalEndpoint, end: &LogicalEndpoint) {
+        match self {
+            NodeType::InputDevice(input_device) => {
+                input_device.on_connect(start, end);
+            }
+            NodeType::PlaybackDevice(playback_device) => {
+                playback_device.on_connect(start, end);
+            }
+            NodeType::Window(window) => {
+                window.on_connect(start, end);
+            }
+        }
+    }
+
+    fn on_disconnect(&mut self, last_connection:bool, start:&LogicalEndpoint, end: &LogicalEndpoint) {
+        match self {
+            NodeType::InputDevice(input_device) => {
+                input_device.on_disconnect(last_connection,start, end);
+            }
+            NodeType::PlaybackDevice(playback_device) => {
+                playback_device.on_disconnect(last_connection, start, end);
+            }
+            NodeType::Window(window) => {
+                window.on_disconnect(last_connection, start, end);
+            }
+        }
+    }
+
+    fn on_data(&mut self, data: &[i16]) {
+        match self {
+            NodeType::InputDevice(input_device) => {
+                input_device.on_data(data);
+            }
+            NodeType::PlaybackDevice(playback_device) => {
+                playback_device.on_data(data);
+            }
+            NodeType::Window(window) => {
+                window.on_data(data);
+            }
+        }
+    }
+}
 
 impl Application {
     pub fn new() -> Self {
@@ -16,11 +63,11 @@ impl Application {
         Application {
             matrix: Matrix::identity(),
             nodes: vec![
-                // Node #0
+                /*// Node #0
                 NodeState {
                     position: Point::new(0.0, 0.0),
                     node_name: String::from("Iced"),
-                    node_type: NodeType::Microphone,
+                    node_type: NodeType::InputDevice(InputDevice{}),
                     attributes: (vec![], vec![NodeAttribute::BlueSquare(None), NodeAttribute::RedCircle(None)]),
                 },
                 // Node #1
@@ -43,7 +90,7 @@ impl Application {
                     node_name: String::from("Editor"),
                     node_type: NodeType::PlaybackDevice,
                     attributes: (vec![NodeAttribute::BlueSquare(None), NodeAttribute::RedCircle(None)], vec![]),
-                },
+                },*/
             ],
             connections,
             dangling_source: None,

@@ -10,14 +10,14 @@ use iced_node_editor::{Matrix, Link, LogicalEndpoint};
 pub trait NodeEvents {
     //fn init(&mut self); // not sure if we need this function
     fn on_connect(&mut self, start:&LogicalEndpoint, end: &LogicalEndpoint);
-    fn on_disconnect(&mut self, start:&LogicalEndpoint, end: &LogicalEndpoint);
+    fn on_disconnect(&mut self, last_connection:bool, start:&LogicalEndpoint, end: &LogicalEndpoint);
     fn on_data(&mut self, data: &[i16]);
 }
 
 pub enum NodeType {
-    Microphone,
-    PlaybackDevice,
-    Window
+    InputDevice(node::input_device::InputDevice),
+    PlaybackDevice(node::playback_device::PlaybackDevice),
+    Window(node::window::WindowCapture)
 }
 
 pub struct NodeState {

@@ -5,7 +5,7 @@ use iced_node_editor::{
     Socket, SocketRole, SocketSide,
 };
 
-use crate::{Application, NodeAttribute};
+use crate::{Application, NodeAttribute, NodeEvents};
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -40,6 +40,8 @@ impl Application {
                 // endpoints. But the `Connect` message is guaranteed to only contain `Link`s with
                 // both endpoints being sockets.
                 let (start, end) = link.unwrap_sockets();
+                self.nodes[start.node_index].node_type.on_connect(&start, &end);
+                self.nodes[end.node_index].node_type.on_connect(&start, &end);
 
                 // Insert the new connection. The hash map design ensures that this will delete any
                 // potentially previously present connections ending in the same node.
@@ -54,6 +56,12 @@ impl Application {
                     .connections
                     .remove(&(endpoint.node_index, endpoint.socket_index))
                 {
+                    let is_last_connection = self.connections.get(&(endpoint.node_index, endpoint.socket_index)).is_none();
+
+                    let start_endpoint = LogicalEndpoint{node_index: start_node_index, role: SocketRole::Out, socket_index: start_socket_index};
+                    self.nodes[start_node_index].node_type.on_disconnect(is_last_connection, &start_endpoint, &endpoint);
+                    self.nodes[endpoint.node_index].node_type.on_disconnect(is_last_connection, &start_endpoint, &endpoint);
+
                     // If there was a connection, turn it into a dangling one, such that the user
                     // may connect it to some other socket instead. First, set the source of the
                     // new dangling connection
