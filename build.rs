@@ -12,13 +12,15 @@ fn main() {
 
         let capture_file = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/LoopbackCapture.cpp");
         let api_file = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/api.cpp");
-        let wil = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/include");
+        let include_lib = PathBuf::from(&base_dir).join("src/platform/windows/audio_capture/include");
+        let wil = PathBuf::from(&base_dir).join("extern/wil/include");
 
         cc::Build::new()
             .cpp(true)
             .file(capture_file)
             .file(api_file)
             .include(wil)
+            .include(include_lib)
             .warnings(false)
             .compile("winloopback");
     }
