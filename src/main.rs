@@ -9,6 +9,12 @@ pub fn main() -> iced::Result {
         .window_size(iced::Size { width: 800.0, height: 600.0 })
         .run()?;
 
+    /*let processes = get_processes_with_windows();
+
+    for (process_id, process_name) in processes {
+        println!("process_id: {}; process_name: {}", process_id, process_name);
+    }*/
+
     /*let pid = 4652;
     println!("capturing audio for process with pid: {}", pid);
 
